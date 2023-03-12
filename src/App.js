@@ -1,17 +1,44 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+// utils
+import { add, remove } from "./utils/array-utils";
 
 // components
-import { Button, Box, Flex, Grid, GridItem, Spacer, Stat, StatLabel, StatNumber, StatHelpText, Text } from '@chakra-ui/react'
+import {
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+  Button,
+  Box,
+  CloseButton,
+  Flex,
+  Grid,
+  GridItem,
+  IconButton,
+  Spacer,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  Text
+} from '@chakra-ui/react'
 
 // images
 import meth from "./resources/images/crystal-meth.png"
 import cash from "./resources/images/cash.png";
+
+// icons
+import { CloseIcon, AddIcon, WarningIcon } from '@chakra-ui/icons'
 
 function App() {
   const [batches, setBatches] = useState(0);
   const [balance, setBalance] = useState(0);
   const [clickValue, setClickValue] = useState(1);
   const [batchValue, setBatchValue] = useState(5);
+  // error, success, warning, and info 
+  const [notifications, setNotifications] = useState([{ index: 0, title: '', message: '', status: 'success' }]);
 
   // increment the count based on click value
   // every second
@@ -85,6 +112,9 @@ function App() {
       fontWeight='bold'
     >
       <GridItem pl='2' bg='#F5F5F5' area={'header'}>
+        <Button colorScheme='red' onClick={() => setNotifications(add(notifications, 'eeibge', 'wdw', 'success'))}>
+          Test Notifications
+        </Button>
       </GridItem>
       <GridItem pl='2' bg='#F5F5F5' area={'sidebar'}>
         <Flex direction="column">
@@ -120,6 +150,55 @@ function App() {
       <GridItem pl='2' bg='#F5F5F5' area={'main'}>
 
       </GridItem>
+      <ul
+        style={{
+          position: 'fixed',
+          bottom: '0',
+          right: '0',
+          top: '0',
+          display: 'flex',
+          flexDirection: 'column',
+          listStyle: 'none',
+          justifyContent: 'flex-end'
+        }}
+      >
+        <AnimatePresence initial={false}>
+          {notifications.map((notification, index) => (
+            <motion.li
+              key={index}
+              positionTransition
+              initial={{ opacity: 0, y: 50, scale: 0.3 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+              style={{
+                width: '300px',
+                background: 'white',
+                margin: '10px',
+                flex: '0 0 65px',
+                position: 'relative',
+                borderRadius: '10px'
+              }}
+            >
+              <Alert h="100%" status={notification.status}>
+                <AlertIcon />
+                <Box>
+                  <AlertTitle>{notification.title}</AlertTitle>
+                  <AlertDescription>
+                    {notification.message}
+                  </AlertDescription>
+                </Box>
+                <CloseButton
+                  alignSelf='flex-start'
+                  position='relative'
+                  right={-1}
+                  top={-1}
+                  onClick={() => setNotifications(remove(notifications, index))}
+                />
+              </Alert>
+            </motion.li>
+          ))}
+        </AnimatePresence>
+      </ul>
     </Grid >
   );
 }
