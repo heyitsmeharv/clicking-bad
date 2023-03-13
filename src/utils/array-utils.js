@@ -1,6 +1,6 @@
 export const remove = (arr, item) => {
   const newArr = [...arr];
-  newArr.splice(newArr.findIndex(i => i === item), 1);
+  newArr.splice(newArr.findIndex(i => i.id === item), 1);
   return newArr;
 };
 
