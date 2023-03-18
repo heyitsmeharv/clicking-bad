@@ -44,7 +44,7 @@ import { CloseIcon, AddIcon, WarningIcon } from '@chakra-ui/icons'
 
 function App() {
   // error, success, warning, and info 
-  const [notifications, setNotifications] = useState([{ index: 0, title: '', message: '', status: 'success' }]);
+  const [notifications, setNotifications] = useState([]);
   const [batches, setBatches] = useState(0);
   const [balance, setBalance] = useState(0);
   const [clickValue, setClickValue] = useState(1);
@@ -52,47 +52,47 @@ function App() {
   const [multiplier, setMultiplier] = useState(1); // for upgrades
 
   const [manufacturingItems, setManufacturingItems] = useState([
-    { name: "Storage Shed", cost: 10, cps: 1, count: 0 },
-    { name: "Used RV", cost: 100, cps: 10, count: 0 },
-    { name: "Abandoned Trailer", cost: 1000, cps: 100, count: 0 },
-    { name: "Small House", cost: 1000, cps: 100, count: 0 },
-    { name: "Abandoned Warehouse", cost: 1000, cps: 100, count: 0 },
-    { name: "Laboratory", cost: 1000, cps: 100, count: 0 },
-    { name: "Underground Laboratory", cost: 1000, cps: 100, count: 0 },
-    { name: "Subterranean Complex", cost: 1000, cps: 100, count: 0 },
-    { name: "Small Island", cost: 1000, cps: 100, count: 0 },
+    { name: "Storage Shed", cost: 10, sell: 5, cps: 1, count: 0 },
+    { name: "Used RV", cost: 100, sell: 5, cps: 10, count: 0 },
+    { name: "Abandoned Trailer", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Small House", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Abandoned Warehouse", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Laboratory", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Underground Laboratory", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Subterranean Complex", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Small Island", cost: 1000, sell: 5, cps: 100, count: 0 },
   ]);
 
   const [distributionItems, setDistributionItems] = useState([
-    { name: "Dealer", cost: 10, cps: 1, count: 0 },
-    { name: "Drug Mule", cost: 100, cps: 10, count: 0 },
-    { name: "Drug Van", cost: 1000, cps: 100, count: 0 },
-    { name: "Sleazy Lawyer", cost: 1000, cps: 100, count: 0 },
-    { name: "Night Club", cost: 1000, cps: 100, count: 0 },
-    { name: "Drug Cartel", cost: 1000, cps: 100, count: 0 },
-    { name: "DEA Mole", cost: 1000, cps: 100, count: 0 },
-    { name: "Foreign Diplomat", cost: 1000, cps: 100, count: 0 },
+    { name: "Dealer", cost: 10, sell: 5, cps: 1, count: 0 },
+    { name: "Drug Mule", cost: 100, sell: 5, cps: 10, count: 0 },
+    { name: "Drug Van", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Sleazy Lawyer", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Night Club", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Drug Cartel", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "DEA Mole", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Foreign Diplomat", cost: 1000, sell: 5, cps: 100, count: 0 },
   ]);
 
   const [launderingItems, setLaunderingItems] = useState([
-    { name: "Lemonade Stand", cost: 10, cps: 1, count: 0 },
-    { name: "Nail Salon", cost: 100, cps: 10, count: 0 },
-    { name: "Banana Stand", cost: 1000, cps: 100, count: 0 },
-    { name: "Laser Tag Theme Park", cost: 1000, cps: 100, count: 0 },
-    { name: "Car Wash", cost: 1000, cps: 100, count: 0 },
-    { name: "Online Donations", cost: 1000, cps: 100, count: 0 },
-    { name: "Chicken Restaurant", cost: 1000, cps: 100, count: 0 },
+    { name: "Lemonade Stand", cost: 10, sell: 5, cps: 1, count: 0 },
+    { name: "Nail Salon", cost: 100, sell: 5, cps: 10, count: 0 },
+    { name: "Banana Stand", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Laser Tag Theme Park", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Car Wash", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Online Donations", cost: 1000, sell: 5, cps: 100, count: 0 },
+    { name: "Chicken Restaurant", cost: 1000, sell: 5, cps: 100, count: 0 },
   ]);
 
   const [upgradeItems, setUpgradeItems] = useState([
-    { name: "Air Fresheners", cost: 10 },
-    { name: "Cheap Cookware", cost: 100 },
-    { name: "Electric Hotplate", cost: 1000 },
-    { name: "Dealer Business Cards", cost: 1000 },
-    { name: "Exhaust Fan", cost: 1000 },
-    { name: "Gas Stove", cost: 1000 },
-    { name: "Stainless Steel Cookware", cost: 1000 },
-    { name: "Portable Power Generator", cost: 1000 },
+    { name: "Air Fresheners", cost: 10, owned: false },
+    { name: "Cheap Cookware", cost: 100, owned: false },
+    { name: "Electric Hotplate", cost: 1000, owned: false },
+    { name: "Dealer Business Cards", cost: 1000, owned: false },
+    { name: "Exhaust Fan", cost: 1000, owned: false },
+    { name: "Gas Stove", cost: 1000, owned: false },
+    { name: "Stainless Steel Cookware", cost: 1000, owned: false },
+    { name: "Portable Power Generator", cost: 1000, owned: false },
   ]);
 
   // increment the batch count based on click value
@@ -173,10 +173,23 @@ function App() {
       const index = manufacturingItems.findIndex((i) => i.name === item.name);
       const newItems = [...manufacturingItems];
       newItems[index].cost = Math.round(item.cost * 1.1);
+      newItems[index].sell = Math.round(item.sell * 1.1);
       newItems[index].count++;
       setManufacturingItems(newItems);
     }
   };
+
+  // sell item
+  const sellItem = (item) => {
+    if (item.count > 0) {
+      setBalance(balance + item.sell);
+      const index = manufacturingItems.findIndex((i) => i.name === item.name);
+      const newItems = [...manufacturingItems];
+      newItems[index].count--;
+      setManufacturingItems(newItems);
+    }
+  };
+
 
   return (
     <Grid
@@ -193,7 +206,7 @@ function App() {
       fontWeight='bold'
     >
       <GridItem pl='2' bg='#F5F5F5' area={'header'}>
-        <Button colorScheme='red' onClick={() => setNotifications(add(notifications, 'eeibge', 'wdw', 'success'))}>
+        <Button colorScheme='red' onClick={() => setNotifications(add(notifications, 'Test notification', 'hello, i am a notification', 'success'))}>
           Test Notifications
         </Button>
       </GridItem>
@@ -237,14 +250,71 @@ function App() {
           <TabList>
             <Tab>Manufacturing</Tab>
             <Tab>Distribution</Tab>
-            <Tab>Upgrades</Tab>
             <Tab>Laundering</Tab>
+            <Tab>Upgrades</Tab>
             <Tab>Achievements</Tab>
           </TabList>
           <TabPanels>
-            <TabPanel>
+            <TabPanel height="90vh" overflowY="auto">
               {manufacturingItems.map((item, index) => (
-                <Card key={index}>
+                <Card key={index} margin="10px 0" background="#1CCAEA">
+                  <CardHeader>
+                    <Flex>
+                      <Heading size='md'>{item.name}</Heading>
+                      <Heading marginLeft="auto" size='md'>x{item.count}</Heading>
+                    </Flex>
+                  </CardHeader>
+                  <CardBody>
+                    <Text>Produces {item.cps} batches per second</Text>
+                  </CardBody>
+                  <CardFooter>
+                    <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
+                    <Button onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </TabPanel>
+            <TabPanel>
+              {distributionItems.map((item, index) => (
+                <Card key={index} margin="10px 0" background="#1CCAEA">
+                  <CardHeader>
+                    <Flex>
+                      <Heading size='md'>{item.name}</Heading>
+                      <Heading marginLeft="auto" size='md'>x{item.count}</Heading>
+                    </Flex>
+                  </CardHeader>
+                  <CardBody>
+                    <Text>Sells {item.cps} batches per second</Text>
+                  </CardBody>
+                  <CardFooter>
+                    <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
+                    <Button onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </TabPanel>
+            <TabPanel>
+              {launderingItems.map((item, index) => (
+                <Card key={index} margin="10px 0" background="#1CCAEA">
+                  <CardHeader>
+                    <Flex>
+                      <Heading size='md'>{item.name}</Heading>
+                      <Heading marginLeft="auto" size='md'>x{item.count}</Heading>
+                    </Flex>
+                  </CardHeader>
+                  <CardBody>
+                    <Text>Launders {item.cps} batches per second</Text>
+                  </CardBody>
+                  <CardFooter>
+                    <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
+                    <Button onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </TabPanel>
+            <TabPanel>
+              {upgradeItems.map((item, index) => (
+                <Card key={index} margin="10px 0" background="#1CCAEA">
                   <CardHeader>
                     <Heading size='md'>{item.name}</Heading>
                   </CardHeader>
@@ -252,19 +322,10 @@ function App() {
                     <Text>Produces {item.cps} batches per second</Text>
                   </CardBody>
                   <CardFooter>
-                    <Button onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
+                    <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
                   </CardFooter>
                 </Card>
               ))}
-            </TabPanel>
-            <TabPanel>
-              <p>two!</p>
-            </TabPanel>
-            <TabPanel>
-              <p>three!</p>
-            </TabPanel>
-            <TabPanel>
-              <p>four!</p>
             </TabPanel>
             <TabPanel>
               <p>five!</p>
