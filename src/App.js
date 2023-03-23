@@ -39,8 +39,11 @@ import {
 import meth from "./resources/images/crystal-meth.png"
 import cash from "./resources/images/cash.png";
 
+// animations
+import "./resources/styles/animations.css";
+
 // icons
-import { CloseIcon, AddIcon, WarningIcon } from '@chakra-ui/icons'
+import { CloseIcon, AddIcon, WarningIcon } from '@chakra-ui/icons';
 
 function App() {
   // error, success, warning, and info 
@@ -50,6 +53,10 @@ function App() {
   const [clickValue, setClickValue] = useState(1);
   const [batchValue, setBatchValue] = useState(5);
   const [multiplier, setMultiplier] = useState(1); // for upgrades
+
+  const [isClicking, setIsClicking] = useState(null);
+  const [mouseX, setMouseX] = useState(0);
+  const [mouseY, setMouseY] = useState(0);
 
   const [manufacturingItems, setManufacturingItems] = useState([
     { name: "Storage Shed", cost: 10, sell: 5, cps: 1, count: 0 },
@@ -131,39 +138,27 @@ function App() {
   }, [batches]);
 
   // increase the batch count based on click value
-  // call batch image function
-  const handleCookBatch = () => {
+  // set is clicking to true to show image
+  const handleCookBatch = (e) => {
+    setMouseX(e.clientX);
+    setMouseY(e.clientY);
     setBatches(batches + clickValue);
-    showBatchImage();
+    setIsClicking('meth');
+    setTimeout(() => setIsClicking(null), 500);
   };
 
   // if we have batches,
   // sell batch for balance based on batch value
-  // call cash image function
-  const handleSellBatch = () => {
+  // set is clicking to true to show image
+  const handleSellBatch = (e) => {
     if (batches > 0) {
+      setMouseX(e.clientX);
+      setMouseY(e.clientY);
       setBatches(batches - clickValue);
       setBalance(balance + batchValue);
-      showCashImage();
+      setIsClicking('cash');
+      setTimeout(() => setIsClicking(null), 500);
     }
-  };
-
-  // function to modify the image style to show when clicked
-  const showBatchImage = () => {
-    const meth = document.getElementById('meth');
-    meth.style.display = 'block';
-    setTimeout(function () {
-      meth.style.display = 'none';
-    }, 100);
-  };
-
-  // function to modify the image style to show when clicked
-  const showCashImage = () => {
-    const cash = document.getElementById('cash');
-    cash.style.display = 'block';
-    setTimeout(function () {
-      cash.style.display = 'none';
-    }, 100);
   };
 
   // purchase item
@@ -190,147 +185,179 @@ function App() {
     }
   };
 
-
   return (
     <Grid
       templateAreas={
-        `"header header"
+        `"sidebar header"
           "sidebar main"
           "sidebar main"`
       }
       gridTemplateRows={'5rem 1fr 30px'}
       gridTemplateColumns={'350px 1fr'}
       h='100vh'
-      gap='1'
-      color='blackAlpha.700'
       fontWeight='bold'
     >
-      <GridItem pl='2' bg='#F5F5F5' area={'header'}>
-        <Button colorScheme='red' onClick={() => setNotifications(add(notifications, 'Test notification', 'hello, i am a notification', 'success'))}>
-          Test Notifications
-        </Button>
-      </GridItem>
-      <GridItem pl='2' bg='#F5F5F5' area={'sidebar'}>
-        <Flex direction="column">
-          <Box p={4} m={4}>
-            <Flex>
+      <GridItem area={'sidebar'}>
+        <Flex direction="row" justifyContent="space-evenly">
+          <Box p={4} m={4} flex={1}>
+            <Flex direction="column">
               <Stat>
                 <StatLabel>Batches Cooked</StatLabel>
                 <StatNumber>{batches}</StatNumber>
                 <StatHelpText>Multiplier {clickValue}</StatHelpText>
               </Stat>
-              <img id='meth' src={meth} style={{ width: '50px', height: '50px', display: 'none' }} alt="meth" />
-              <Button borderRadius='23px' w='50%' h='50px' colorScheme='blue' onClick={handleCookBatch}>
-                <Text fontSize='2xl'>
+              {isClicking === 'meth' && (
+                <img
+                  id='meth'
+                  style={{
+                    width: '50px',
+                    height: '50px',
+                    position: 'absolute',
+                    top: mouseY,
+                    left: mouseX,
+                    backgroundSize: 'contain',
+                    backgroundRepeat: 'no-repeat',
+                    animation: 'clickAnimation 0.5s ease-out forwards',
+                    zIndex: 9999
+                  }}
+                  src={meth}
+                  alt="meth"
+                />
+              )}
+              <Button borderRadius='23px' colorScheme='blue' onClick={e => handleCookBatch(e)}>
+                <Text>
                   COOK!
                 </Text>
               </Button>
             </Flex>
           </Box>
-          <Spacer />
-          <Box p={4} m={4}>
-            <Flex>
+          <Box p={4} m={4} flex={1}>
+            <Flex direction="column">
               <Stat>
                 <StatLabel>Cash Stack</StatLabel>
                 <StatNumber>${balance}.00</StatNumber>
                 <StatHelpText>Batch Value {batchValue}</StatHelpText>
               </Stat>
-              <img id='cash' src={cash} style={{ width: '50px', height: '50px', display: 'none' }} alt="cash" />
-              <Button borderRadius='23px' w='50%' h='50px' colorScheme='green' onClick={handleSellBatch}>
-                <Text fontSize='2xl'>
-                  Sell
+              {isClicking === 'cash' && (
+                <img
+                  id='cash'
+                  style={{
+                    width: '50px',
+                    height: '50px',
+                    position: 'absolute',
+                    top: mouseY,
+                    left: mouseX,
+                    backgroundSize: 'contain',
+                    backgroundRepeat: 'no-repeat',
+                    animation: 'clickAnimation 0.5s ease-out forwards',
+                    zIndex: 9999
+                  }}
+                  src={cash}
+                  alt="cash"
+                />
+              )}
+              <Button borderRadius='23px' colorScheme='green' onClick={e => handleSellBatch(e)}>
+                <Text>
+                  SELL!
                 </Text>
               </Button>
             </Flex>
           </Box>
         </Flex>
       </GridItem>
-      <GridItem pl='2' bg='#F5F5F5' area={'main'}>
-        <Tabs isFitted variant='soft-rounded' colorScheme='blue'>
+      {/* <GridItem pl='2' bg='#1CCAEA' area={'header'}>
+        <Button colorScheme='red' onClick={() => setNotifications(add(notifications, 'Test notification', 'hello, i am a notification', 'success'))}>
+          Test Notifications
+        </Button>
+      </GridItem> */}
+      <GridItem area={'header'}>
+        <Tabs isFitted variant='unstyled' colorScheme='blue'>
           <TabList>
-            <Tab>Manufacturing</Tab>
+            <Tab height="50px" _selected={{ background: "#1CCAEA" }}>Manufacturing</Tab>
             <Tab>Distribution</Tab>
             <Tab>Laundering</Tab>
             <Tab>Upgrades</Tab>
             <Tab>Achievements</Tab>
           </TabList>
-          <TabPanels>
-            <TabPanel height="90vh" overflowY="auto">
-              {manufacturingItems.map((item, index) => (
-                <Card key={index} margin="10px 0" background="#1CCAEA">
-                  <CardHeader>
-                    <Flex>
+          <GridItem area={'main'}>
+            <TabPanels>
+              <TabPanel padding={0} height="95vh" overflowY="auto">
+                {manufacturingItems.map((item, index) => (
+                  <Card key={index}>
+                    <CardHeader>
+                      <Flex>
+                        <Heading size='md'>{item.name}</Heading>
+                        <Heading marginLeft="auto" size='md'>x{item.count}</Heading>
+                      </Flex>
+                    </CardHeader>
+                    <CardBody>
+                      <Text>Produces {item.cps} batches per second</Text>
+                    </CardBody>
+                    <CardFooter>
+                      <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
+                      <Button onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </TabPanel>
+              <TabPanel>
+                {distributionItems.map((item, index) => (
+                  <Card key={index}>
+                    <CardHeader>
+                      <Flex>
+                        <Heading size='md'>{item.name}</Heading>
+                        <Heading marginLeft="auto" size='md'>x{item.count}</Heading>
+                      </Flex>
+                    </CardHeader>
+                    <CardBody>
+                      <Text>Sells {item.cps} batches per second</Text>
+                    </CardBody>
+                    <CardFooter>
+                      <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
+                      <Button onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </TabPanel>
+              <TabPanel>
+                {launderingItems.map((item, index) => (
+                  <Card key={index}>
+                    <CardHeader>
+                      <Flex>
+                        <Heading size='md'>{item.name}</Heading>
+                        <Heading marginLeft="auto" size='md'>x{item.count}</Heading>
+                      </Flex>
+                    </CardHeader>
+                    <CardBody>
+                      <Text>Launders {item.cps} batches per second</Text>
+                    </CardBody>
+                    <CardFooter>
+                      <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
+                      <Button onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </TabPanel>
+              <TabPanel>
+                {upgradeItems.map((item, index) => (
+                  <Card key={index} background="#1CCAEA">
+                    <CardHeader>
                       <Heading size='md'>{item.name}</Heading>
-                      <Heading marginLeft="auto" size='md'>x{item.count}</Heading>
-                    </Flex>
-                  </CardHeader>
-                  <CardBody>
-                    <Text>Produces {item.cps} batches per second</Text>
-                  </CardBody>
-                  <CardFooter>
-                    <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
-                    <Button onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </TabPanel>
-            <TabPanel>
-              {distributionItems.map((item, index) => (
-                <Card key={index} margin="10px 0" background="#1CCAEA">
-                  <CardHeader>
-                    <Flex>
-                      <Heading size='md'>{item.name}</Heading>
-                      <Heading marginLeft="auto" size='md'>x{item.count}</Heading>
-                    </Flex>
-                  </CardHeader>
-                  <CardBody>
-                    <Text>Sells {item.cps} batches per second</Text>
-                  </CardBody>
-                  <CardFooter>
-                    <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
-                    <Button onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </TabPanel>
-            <TabPanel>
-              {launderingItems.map((item, index) => (
-                <Card key={index} margin="10px 0" background="#1CCAEA">
-                  <CardHeader>
-                    <Flex>
-                      <Heading size='md'>{item.name}</Heading>
-                      <Heading marginLeft="auto" size='md'>x{item.count}</Heading>
-                    </Flex>
-                  </CardHeader>
-                  <CardBody>
-                    <Text>Launders {item.cps} batches per second</Text>
-                  </CardBody>
-                  <CardFooter>
-                    <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
-                    <Button onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </TabPanel>
-            <TabPanel>
-              {upgradeItems.map((item, index) => (
-                <Card key={index} margin="10px 0" background="#1CCAEA">
-                  <CardHeader>
-                    <Heading size='md'>{item.name}</Heading>
-                  </CardHeader>
-                  <CardBody>
-                    <Text>Produces {item.cps} batches per second</Text>
-                  </CardBody>
-                  <CardFooter>
-                    <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </TabPanel>
-            <TabPanel>
-              <p>five!</p>
-            </TabPanel>
-          </TabPanels>
+                    </CardHeader>
+                    <CardBody>
+                      <Text>Produces {item.cps} batches per second</Text>
+                    </CardBody>
+                    <CardFooter>
+                      <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </TabPanel>
+              <TabPanel>
+                <p>five!</p>
+              </TabPanel>
+            </TabPanels>
+          </GridItem>
         </Tabs>
       </GridItem>
       <ul
