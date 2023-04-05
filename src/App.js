@@ -188,55 +188,56 @@ function App() {
   return (
     <Grid
       templateAreas={
-        `"sidebar header"
+        `"sidebar main"
           "sidebar main"
           "sidebar main"`
       }
       gridTemplateRows={'5rem 1fr 30px'}
-      gridTemplateColumns={'350px 1fr'}
+      gridTemplateColumns={'450px 1fr'}
       h='100vh'
       fontWeight='bold'
     >
-      <GridItem area={'sidebar'}>
-        <Flex direction="row" justifyContent="space-evenly">
-          <Box p={4} m={4} flex={1}>
+      <GridItem area={'main'}>
+        <Flex m={4} direction="row" justifyContent="space-evenly">
+          <Stat p={4} background='#f5f3f4'>
+            <StatLabel>Batches Cooked</StatLabel>
+            <StatNumber>{batches}</StatNumber>
+            <StatHelpText >Multiplier x{clickValue}</StatHelpText>
+            <Button colorScheme='blue' onClick={e => handleCookBatch(e)}>
+              <Text>
+                COOK!
+              </Text>
+            </Button>
+          </Stat>
+          {isClicking === 'meth' && (
+            <img
+              id='meth'
+              style={{
+                width: '50px',
+                height: '50px',
+                position: 'absolute',
+                top: mouseY,
+                left: mouseX,
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                animation: 'clickAnimation 0.5s ease-out forwards',
+                zIndex: 9999
+              }}
+              src={meth}
+              alt="meth"
+            />
+          )}
+          <Box p={2} m={2} flex={1}>
             <Flex direction="column">
-              <Stat>
-                <StatLabel>Batches Cooked</StatLabel>
-                <StatNumber>{batches}</StatNumber>
-                <StatHelpText>Multiplier {clickValue}</StatHelpText>
-              </Stat>
-              {isClicking === 'meth' && (
-                <img
-                  id='meth'
-                  style={{
-                    width: '50px',
-                    height: '50px',
-                    position: 'absolute',
-                    top: mouseY,
-                    left: mouseX,
-                    backgroundSize: 'contain',
-                    backgroundRepeat: 'no-repeat',
-                    animation: 'clickAnimation 0.5s ease-out forwards',
-                    zIndex: 9999
-                  }}
-                  src={meth}
-                  alt="meth"
-                />
-              )}
-              <Button borderRadius='23px' colorScheme='blue' onClick={e => handleCookBatch(e)}>
-                <Text>
-                  COOK!
-                </Text>
-              </Button>
-            </Flex>
-          </Box>
-          <Box p={4} m={4} flex={1}>
-            <Flex direction="column">
-              <Stat>
+              <Stat p={4} background='#f5f3f4' height="250px">
                 <StatLabel>Cash Stack</StatLabel>
                 <StatNumber>${balance}.00</StatNumber>
                 <StatHelpText>Batch Value {batchValue}</StatHelpText>
+                <Button colorScheme='green' onClick={e => handleSellBatch(e)}>
+                  <Text>
+                    SELL!
+                  </Text>
+                </Button>
               </Stat>
               {isClicking === 'cash' && (
                 <img
@@ -256,11 +257,6 @@ function App() {
                   alt="cash"
                 />
               )}
-              <Button borderRadius='23px' colorScheme='green' onClick={e => handleSellBatch(e)}>
-                <Text>
-                  SELL!
-                </Text>
-              </Button>
             </Flex>
           </Box>
         </Flex>
@@ -270,16 +266,16 @@ function App() {
           Test Notifications
         </Button>
       </GridItem> */}
-      <GridItem area={'header'}>
+      <GridItem area={'sidebar'}>
         <Tabs isFitted variant='unstyled' colorScheme='blue'>
           <TabList>
-            <Tab height="50px" _selected={{ background: "#1CCAEA" }}>Manufacturing</Tab>
-            <Tab>Distribution</Tab>
-            <Tab>Laundering</Tab>
-            <Tab>Upgrades</Tab>
-            <Tab>Achievements</Tab>
+            <Tab fontSize="1.2rem" height="50px" _selected={{ background: "#1CCAEA", color: '#fff' }}>Manufacturing</Tab>
+            <Tab fontSize="1.2rem" height="50px" _selected={{ background: "#1CCAEA", color: '#fff' }}>Distribution</Tab>
+            <Tab fontSize="1.2rem" height="50px" _selected={{ background: "#1CCAEA", color: '#fff' }}>Laundering</Tab>
+            <Tab fontSize="1.2rem" height="50px" _selected={{ background: "#1CCAEA", color: '#fff' }}>Upgrades</Tab>
+            <Tab fontSize="1.2rem" height="50px" _selected={{ background: "#1CCAEA", color: '#fff' }}>Achievements</Tab>
           </TabList>
-          <GridItem area={'main'}>
+          <GridItem area={'sidebar'}>
             <TabPanels>
               <TabPanel padding={0} height="95vh" overflowY="auto">
                 {manufacturingItems.map((item, index) => (
@@ -300,7 +296,7 @@ function App() {
                   </Card>
                 ))}
               </TabPanel>
-              <TabPanel>
+              <TabPanel padding={0} height="95vh" overflowY="auto">
                 {distributionItems.map((item, index) => (
                   <Card key={index}>
                     <CardHeader>
@@ -319,7 +315,7 @@ function App() {
                   </Card>
                 ))}
               </TabPanel>
-              <TabPanel>
+              <TabPanel padding={0} height="95vh" overflowY="auto">
                 {launderingItems.map((item, index) => (
                   <Card key={index}>
                     <CardHeader>
@@ -338,9 +334,9 @@ function App() {
                   </Card>
                 ))}
               </TabPanel>
-              <TabPanel>
+              <TabPanel padding={0} height="95vh" overflowY="auto">
                 {upgradeItems.map((item, index) => (
-                  <Card key={index} background="#1CCAEA">
+                  <Card key={index}>
                     <CardHeader>
                       <Heading size='md'>{item.name}</Heading>
                     </CardHeader>
