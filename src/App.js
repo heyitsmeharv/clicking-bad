@@ -24,6 +24,8 @@ import {
   IconButton,
   Spacer,
   Stat,
+  StatArrow,
+  StatGroup,
   StatLabel,
   StatNumber,
   StatHelpText,
@@ -43,7 +45,7 @@ import cash from "./resources/images/cash.png";
 import "./resources/styles/animations.css";
 
 // icons
-import { CloseIcon, AddIcon, WarningIcon } from '@chakra-ui/icons';
+import { CloseIcon, AddIcon, WarningIcon, CheckIcon, NotAllowedIcon } from '@chakra-ui/icons';
 
 function App() {
   // error, success, warning, and info 
@@ -53,6 +55,9 @@ function App() {
   const [clickValue, setClickValue] = useState(1);
   const [batchValue, setBatchValue] = useState(5);
   const [multiplier, setMultiplier] = useState(1); // for upgrades
+
+  const [timeline, setTimeline] = useState([]);
+  const [timeStamp] = useState(new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
 
   const [isClicking, setIsClicking] = useState(null);
   const [mouseX, setMouseX] = useState(0);
@@ -92,15 +97,32 @@ function App() {
   ]);
 
   const [upgradeItems, setUpgradeItems] = useState([
-    { name: "Air Fresheners", cost: 10, owned: false },
-    { name: "Cheap Cookware", cost: 100, owned: false },
-    { name: "Electric Hotplate", cost: 1000, owned: false },
-    { name: "Dealer Business Cards", cost: 1000, owned: false },
-    { name: "Exhaust Fan", cost: 1000, owned: false },
-    { name: "Gas Stove", cost: 1000, owned: false },
-    { name: "Stainless Steel Cookware", cost: 1000, owned: false },
-    { name: "Portable Power Generator", cost: 1000, owned: false },
+    { name: "Air Fresheners", description: "With the sweet sent of pine in the air, you can cook an extra batch at a time.", cost: 10, owned: false },
+    { name: "Goatee", description: "Your mighty goatee intimidates buyers into buying more product; you can now sell an extra batch at a time.", cost: 10, owned: false },
+    { name: "Cheap Cookware", description: "With the sweet sent of pine in the air, you can cook an extra batch at a time.", cost: 100, owned: false },
+    { name: "Electric Hotplate", description: "With the sweet sent of pine in the air, you can cook an extra batch at a time.", cost: 1000, owned: false },
+    { name: "Dealer Business Cards", description: "With the sweet sent of pine in the air, you can cook an extra batch at a time.", cost: 1000, owned: false },
+    { name: "Exhaust Fan", description: "With the sweet sent of pine in the air, you can cook an extra batch at a time.", cost: 1000, owned: false },
+    { name: "Gas Stove", description: "Improves meth purity by 0.5 IPU.", cost: 120, owned: false },
+    { name: "Stainless Steel Cookware", description: "Improves meth purity by 0.5 IPU.", cost: 120, owned: false },
+    { name: "Portable Power Generator", description: "Improves meth purity by 0.5 IPU.", cost: 120, owned: false },
   ]);
+
+  const [achievements, setAchievements] = useState([
+    { name: "This is kinda fun...", description: "You've hand-cooked your first batch of meth", completed: false },
+    { name: "I see how this works", description: "You've hand-cooked 100 batches of meth", completed: false },
+    { name: "Click apprentice", description: "You've hand-cooked 1,000 batches of meth", completed: false },
+    { name: "Click magician", description: "You've hand-cooked 100,000 batches of meth", completed: false },
+    { name: "Clickity-splickity", description: "You've hand-cooked 1,000,000 batches of meth", completed: false },
+    { name: "I AM THE ONE WHO CLICKS", description: "YOU are to be feared. You've hand-cooked 100,000,000 batches of meth!", completed: false },
+    { name: "In the meth business", description: "You've earned your first $1,000 ", completed: false },
+    { name: "In the money business", description: "You've earned your first $1,000,000 ", completed: false },
+  ]);
+
+  // set window title
+  useEffect(() => {
+    document.title = `Batches ${batches} | $${balance} | Clicking Bad`;
+  }, [balance, batches]);
 
   // increment the batch count based on click value
   // and purchased items every second
@@ -121,6 +143,7 @@ function App() {
       const totalCPS = (itemCount * multiplier) + cpsCount;
       console.log('totalCPS', totalCPS);
       setBatches(batches + totalCPS);
+      addTimeline("Batched Cooked and Sold");
     }, 1000);
     return () => clearInterval(timer);
   }, [batches]);
@@ -145,6 +168,7 @@ function App() {
     setBatches(batches + clickValue);
     setIsClicking('meth');
     setTimeout(() => setIsClicking(null), 500);
+    addTimeline("Batched Cooked");
   };
 
   // if we have batches,
@@ -158,6 +182,7 @@ function App() {
       setBalance(balance + batchValue);
       setIsClicking('cash');
       setTimeout(() => setIsClicking(null), 500);
+      addTimeline("Batched Sold");
     }
   };
 
@@ -171,6 +196,7 @@ function App() {
       newItems[index].sell = Math.round(item.sell * 1.1);
       newItems[index].count++;
       setManufacturingItems(newItems);
+      addTimeline(`${item.name} Purchased for $${item.cost}`);
     }
   };
 
@@ -182,33 +208,48 @@ function App() {
       const newItems = [...manufacturingItems];
       newItems[index].count--;
       setManufacturingItems(newItems);
+      addTimeline(`${item.name} Sold for $${item.sell}`);
     }
   };
+
+  // push user actions to an array to display on screen
+  const addTimeline = action => {
+    const newTimeline = [...timeline];
+    newTimeline.push(`${timeStamp} ${action}`)
+    setTimeline(newTimeline);
+  }
 
   return (
     <Grid
       templateAreas={
-        `"sidebar main"
+        `"sidebar header"
           "sidebar main"
           "sidebar main"`
       }
-      gridTemplateRows={'5rem 1fr 30px'}
+      gridTemplateRows={'1fr'}
       gridTemplateColumns={'450px 1fr'}
       h='100vh'
       fontWeight='bold'
     >
-      <GridItem area={'main'}>
-        <Flex m={4} direction="row" justifyContent="space-evenly">
-          <Stat p={4} background='#f5f3f4'>
-            <StatLabel>Batches Cooked</StatLabel>
-            <StatNumber>{batches}</StatNumber>
-            <StatHelpText >Multiplier x{clickValue}</StatHelpText>
-            <Button colorScheme='blue' onClick={e => handleCookBatch(e)}>
-              <Text>
-                COOK!
-              </Text>
-            </Button>
+      <GridItem area={'header'}>
+        <StatGroup>
+          <Stat p={6} m={12}>
+            <Flex>
+              <Box>
+                <StatLabel fontSize="4xl">Batches Cooked</StatLabel>
+                <StatNumber fontSize="3xl">{batches}</StatNumber>
+                <StatHelpText fontSize="xl">Multiplier x{clickValue}</StatHelpText>
+              </Box>
+              <Box ml="auto">
+                <Button colorScheme='blue' onClick={e => handleCookBatch(e)}>
+                  <Text>
+                    COOK!
+                  </Text>
+                </Button>
+              </Box>
+            </Flex>
           </Stat>
+
           {isClicking === 'meth' && (
             <img
               id='meth'
@@ -227,39 +268,41 @@ function App() {
               alt="meth"
             />
           )}
-          <Box p={2} m={2} flex={1}>
-            <Flex direction="column">
-              <Stat p={4} background='#f5f3f4' height="250px">
-                <StatLabel>Cash Stack</StatLabel>
-                <StatNumber>${balance}.00</StatNumber>
-                <StatHelpText>Batch Value {batchValue}</StatHelpText>
+          <Stat p={6} m={12}>
+            <Flex>
+              <Box>
+                <StatLabel fontSize="4xl">Cash Stack</StatLabel>
+                <StatNumber fontSize="3xl">${balance}.00</StatNumber>
+                <StatHelpText fontSize="xl">Batch Value {batchValue}</StatHelpText>
+              </Box>
+              <Box ml="auto">
                 <Button colorScheme='green' onClick={e => handleSellBatch(e)}>
                   <Text>
                     SELL!
                   </Text>
                 </Button>
-              </Stat>
-              {isClicking === 'cash' && (
-                <img
-                  id='cash'
-                  style={{
-                    width: '50px',
-                    height: '50px',
-                    position: 'absolute',
-                    top: mouseY,
-                    left: mouseX,
-                    backgroundSize: 'contain',
-                    backgroundRepeat: 'no-repeat',
-                    animation: 'clickAnimation 0.5s ease-out forwards',
-                    zIndex: 9999
-                  }}
-                  src={cash}
-                  alt="cash"
-                />
-              )}
+              </Box>
             </Flex>
-          </Box>
-        </Flex>
+          </Stat>
+        </StatGroup>
+        {isClicking === 'cash' && (
+          <img
+            id='cash'
+            style={{
+              width: '50px',
+              height: '50px',
+              position: 'absolute',
+              top: mouseY,
+              left: mouseX,
+              backgroundSize: 'contain',
+              backgroundRepeat: 'no-repeat',
+              animation: 'clickAnimation 0.5s ease-out forwards',
+              zIndex: 9999
+            }}
+            src={cash}
+            alt="cash"
+          />
+        )}
       </GridItem>
       {/* <GridItem pl='2' bg='#1CCAEA' area={'header'}>
         <Button colorScheme='red' onClick={() => setNotifications(add(notifications, 'Test notification', 'hello, i am a notification', 'success'))}>
@@ -277,7 +320,7 @@ function App() {
           </TabList>
           <GridItem area={'sidebar'}>
             <TabPanels>
-              <TabPanel padding={0} height="95vh" overflowY="auto">
+              <TabPanel padding={0} height="100vh" overflowY="auto">
                 {manufacturingItems.map((item, index) => (
                   <Card key={index}>
                     <CardHeader>
@@ -296,7 +339,7 @@ function App() {
                   </Card>
                 ))}
               </TabPanel>
-              <TabPanel padding={0} height="95vh" overflowY="auto">
+              <TabPanel padding={0} height="100vh" overflowY="auto">
                 {distributionItems.map((item, index) => (
                   <Card key={index}>
                     <CardHeader>
@@ -315,7 +358,7 @@ function App() {
                   </Card>
                 ))}
               </TabPanel>
-              <TabPanel padding={0} height="95vh" overflowY="auto">
+              <TabPanel padding={0} height="100vh" overflowY="auto">
                 {launderingItems.map((item, index) => (
                   <Card key={index}>
                     <CardHeader>
@@ -334,14 +377,17 @@ function App() {
                   </Card>
                 ))}
               </TabPanel>
-              <TabPanel padding={0} height="95vh" overflowY="auto">
+              <TabPanel padding={0} height="100vh" overflowY="auto">
                 {upgradeItems.map((item, index) => (
                   <Card key={index}>
                     <CardHeader>
-                      <Heading size='md'>{item.name}</Heading>
+                      <Flex>
+                        <Heading size='md'>{item.name}</Heading>
+                        <Heading marginLeft="auto" size='md'>{item.completed ? <CheckIcon /> : <NotAllowedIcon />}</Heading>
+                      </Flex>
                     </CardHeader>
                     <CardBody>
-                      <Text>Produces {item.cps} batches per second</Text>
+                      <Text>{item.description}</Text>
                     </CardBody>
                     <CardFooter>
                       <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
@@ -349,12 +395,31 @@ function App() {
                   </Card>
                 ))}
               </TabPanel>
-              <TabPanel>
-                <p>five!</p>
+              <TabPanel padding={0} height="100vh" overflowY="auto">
+                {achievements.map((item, index) => (
+                  <Card key={index}>
+                    <CardHeader>
+                      <Flex>
+                        <Heading size='md'>{item.name}</Heading>
+                        <Heading marginLeft="auto" size='md'>{item.completed ? <CheckIcon /> : <NotAllowedIcon />}</Heading>
+                      </Flex>
+                    </CardHeader>
+                    <CardBody>
+                      <Text>{item.description}</Text>
+                    </CardBody>
+                  </Card>
+                ))}
               </TabPanel>
             </TabPanels>
           </GridItem>
         </Tabs>
+      </GridItem>
+      <GridItem area={'main'}>
+        <Box overflowY={"auto"} p={6} m={12} height="100vh" border="2px solid black">
+          {timeline.map((item, index) => (
+            <Text key={index}>{item}</Text>
+          ))}
+        </Box>
       </GridItem>
       <ul
         style={{
@@ -405,7 +470,7 @@ function App() {
           ))}
         </AnimatePresence>
       </ul>
-    </Grid >
+    </Grid>
   );
 }
 
