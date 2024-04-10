@@ -206,13 +206,6 @@ function App() {
     document.title = `Batches ${batches} | $${balance} | Clicking Bad`;
   }, [balance, batches]);
 
-  // remove old timeline events
-  useEffect(() => {
-    if (timeline.length > 50) {
-      const newTimeline = removeRange(timeline, 0, 50);
-      setTimeline(newTimeline);
-    }
-  }, [timeline]);
 
   // increment the batch count based on click value
   // and purchased items every second
@@ -233,8 +226,8 @@ function App() {
       const totalCPS = (itemCount * multiplier) + cpsCount;
       console.log('totalCPS', totalCPS);
       setBatches(batches + totalCPS);
-      addTimeline("Batched Cooked");
     }, 1000);
+    addTimeline("Batched Cooked");
     return () => clearInterval(timer);
   }, [batches]);
 
@@ -304,6 +297,13 @@ function App() {
 
   // push user actions to an array to display on screen
   const addTimeline = action => {
+    // clean up the timeline so it doesn't get too big
+    if (timeline.length > 50) {
+      const newTimeline = removeRange(timeline, 0, 25);
+      setTimeline(newTimeline);
+      return;
+    }
+
     const newTimeline = [...timeline];
     const timeStamp = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
     newTimeline.push(`${timeStamp} ${action}`)
