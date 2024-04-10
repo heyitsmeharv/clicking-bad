@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // utils
-import { add, remove } from "./utils/array-utils";
+import { add, remove, removeRange } from "./utils/array-utils";
 
 // components
 import {
@@ -57,7 +57,6 @@ function App() {
   const [multiplier, setMultiplier] = useState(1); // for upgrades
 
   const [timeline, setTimeline] = useState([]);
-  const [timeStamp] = useState(new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
 
   const [isClicking, setIsClicking] = useState(null);
   const [mouseX, setMouseX] = useState(0);
@@ -119,10 +118,101 @@ function App() {
     { name: "In the money business", description: "You've earned your first $1,000,000 ", completed: false },
   ]);
 
+  // get cookie
+  const getCookie = (name) => {
+    const decodedCookies = decodeURIComponent(document.cookie);
+    const cookiesArray = decodedCookies.split(';');
+    for (let i = 0; i < cookiesArray.length; i++) {
+      let cookie = cookiesArray[i].trim();
+      if (cookie.startsWith(name + '=')) {
+        return cookie.substring(name.length + 1);
+      }
+    }
+    return null;
+  };
+
+  // set cookie
+  const setCookie = (name, value, days) => {
+    const expirationDate = new Date();
+    expirationDate.setTime(expirationDate.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + expirationDate.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/";
+  };
+
+  // load state from cookie when the component mounts
+  useEffect(() => {
+    const storedBatches = parseInt(getCookie("batches"), 10);
+    if (!isNaN(storedBatches)) {
+      setBatches(storedBatches);
+    }
+    const storedBalance = parseInt(getCookie("balance"), 10);
+    if (!isNaN(storedBalance)) {
+      setBalance(storedBalance);
+    }
+    const storedClickValue = parseInt(getCookie("clickValue"), 10);
+    if (!isNaN(storedClickValue)) {
+      setClickValue(storedClickValue);
+    }
+    const storedBatchValue = parseInt(getCookie("batchValue"), 10);
+    if (!isNaN(storedBatchValue)) {
+      setBatchValue(storedBatchValue);
+    }
+    const storedMultiplier = parseInt(getCookie("multiplier"), 10);
+    if (!isNaN(storedMultiplier)) {
+      setMultiplier(storedMultiplier);
+    }
+    const storedManufacturingItems = getCookie('manufacturingItems');
+    if (!isNaN(storedManufacturingItems)) {
+      setManufacturingItems(JSON.parse(storedManufacturingItems));
+    }
+    const storedDistributionItems = getCookie('distributionItems');
+    if (!isNaN(storedDistributionItems)) {
+      setDistributionItems(JSON.parse(storedDistributionItems));
+    }
+    const storedLaunderingItems = getCookie('launderingItems');
+    if (!isNaN(storedLaunderingItems)) {
+      setLaunderingItems(JSON.parse(storedLaunderingItems));
+    }
+    const storedUpgradeItems = getCookie('upgradeItems');
+    if (!isNaN(storedUpgradeItems)) {
+      setUpgradeItems(JSON.parse(storedUpgradeItems));
+    }
+    const storedAchievements = getCookie('achievements');
+    if (!isNaN(storedAchievements)) {
+      setAchievements(JSON.parse(storedAchievements));
+    }
+  }, []);
+
+  // call setCookie function every 5 minutes
+  useEffect(() => {
+    setNotifications(add(notifications, 'Saved', 'Your game has been saved', 'info'));
+    const interval = setInterval(() => {
+      setCookie('batches', batches, 1);
+      setCookie('balance', balance, 1);
+      setCookie('clickValue', clickValue, 1);
+      setCookie('batchValue', batchValue, 1);
+      setCookie('multiplier', multiplier, 1);
+      setCookie('manufacturingItems', JSON.stringify(manufacturingItems), 1);
+      setCookie('distributionItems', JSON.stringify(distributionItems), 1);
+      setCookie('launderingItems', JSON.stringify(launderingItems), 1);
+      setCookie('upgradeItems', JSON.stringify(upgradeItems), 1);
+      setCookie('achievements', JSON.stringify(achievements), 1);
+    }, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   // set window title
   useEffect(() => {
     document.title = `Batches ${batches} | $${balance} | Clicking Bad`;
   }, [balance, batches]);
+
+  // remove old timeline events
+  useEffect(() => {
+    if (timeline.length > 50) {
+      const newTimeline = removeRange(timeline, 0, 50);
+      setTimeline(newTimeline);
+    }
+  }, [timeline]);
 
   // increment the batch count based on click value
   // and purchased items every second
@@ -143,7 +233,7 @@ function App() {
       const totalCPS = (itemCount * multiplier) + cpsCount;
       console.log('totalCPS', totalCPS);
       setBatches(batches + totalCPS);
-      addTimeline("Batched Cooked and Sold");
+      addTimeline("Batched Cooked");
     }, 1000);
     return () => clearInterval(timer);
   }, [batches]);
@@ -215,6 +305,7 @@ function App() {
   // push user actions to an array to display on screen
   const addTimeline = action => {
     const newTimeline = [...timeline];
+    const timeStamp = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
     newTimeline.push(`${timeStamp} ${action}`)
     setTimeline(newTimeline);
   }
@@ -223,16 +314,15 @@ function App() {
     <Grid
       templateAreas={
         `"sidebar header"
-          "sidebar main"
-          "sidebar main"`
+        "sidebar main"`
       }
-      gridTemplateRows={'1fr'}
-      gridTemplateColumns={'450px 1fr'}
-      h='100vh'
-      fontWeight='bold'
+      gridTemplateColumns={"0.8fr 1.2fr"}
+      gridTemplateRows={"0.3fr 1.7fr"}
+      h="100vh"
+      fontWeight="bold"
     >
-      <GridItem area={'header'}>
-        <StatGroup>
+      <GridItem area={"header"} height="auto">
+        <StatGroup background="#093009" color="#fff">
           <Stat p={6} m={12}>
             <Flex>
               <Box>
@@ -241,10 +331,8 @@ function App() {
                 <StatHelpText fontSize="xl">Multiplier x{clickValue}</StatHelpText>
               </Box>
               <Box ml="auto">
-                <Button colorScheme='blue' onClick={e => handleCookBatch(e)}>
-                  <Text>
-                    COOK!
-                  </Text>
+                <Button h="100px" w="100px" borderRadius="13px" colorScheme="blue" fontSize="3xl" onClick={e => handleCookBatch(e)}>
+                  COOK!
                 </Button>
               </Box>
             </Flex>
@@ -276,10 +364,8 @@ function App() {
                 <StatHelpText fontSize="xl">Batch Value {batchValue}</StatHelpText>
               </Box>
               <Box ml="auto">
-                <Button colorScheme='green' onClick={e => handleSellBatch(e)}>
-                  <Text>
-                    SELL!
-                  </Text>
+                <Button h="100px" w="100px" borderRadius="13px" colorScheme="green" fontSize="3xl" onClick={e => handleSellBatch(e)}>
+                  SELL!
                 </Button>
               </Box>
             </Flex>
@@ -312,17 +398,17 @@ function App() {
       <GridItem area={'sidebar'}>
         <Tabs isFitted variant='unstyled' colorScheme='blue'>
           <TabList>
-            <Tab fontSize="1.2rem" height="50px" _selected={{ background: "#1CCAEA", color: '#fff' }}>Manufacturing</Tab>
-            <Tab fontSize="1.2rem" height="50px" _selected={{ background: "#1CCAEA", color: '#fff' }}>Distribution</Tab>
-            <Tab fontSize="1.2rem" height="50px" _selected={{ background: "#1CCAEA", color: '#fff' }}>Laundering</Tab>
-            <Tab fontSize="1.2rem" height="50px" _selected={{ background: "#1CCAEA", color: '#fff' }}>Upgrades</Tab>
-            <Tab fontSize="1.2rem" height="50px" _selected={{ background: "#1CCAEA", color: '#fff' }}>Achievements</Tab>
+            <Tab background="#1F6032" color="#fff" fontSize="1.2rem" height="50px" _selected={{ background: "#0D3E10" }}>Manufacturing</Tab>
+            <Tab background="#1F6032" color="#fff" fontSize="1.2rem" height="50px" _selected={{ background: "#0D3E10" }}>Distribution</Tab>
+            <Tab background="#1F6032" color="#fff" fontSize="1.2rem" height="50px" _selected={{ background: "#0D3E10" }}>Laundering</Tab>
+            <Tab background="#1F6032" color="#fff" fontSize="1.2rem" height="50px" _selected={{ background: "#0D3E10" }}>Upgrades</Tab>
+            <Tab background="#1F6032" color="#fff" fontSize="1.2rem" height="50px" _selected={{ background: "#0D3E10" }}>Achievements</Tab>
           </TabList>
           <GridItem area={'sidebar'}>
-            <TabPanels>
+            <TabPanels background="#032202">
               <TabPanel padding={0} height="100vh" overflowY="auto">
                 {manufacturingItems.map((item, index) => (
-                  <Card key={index}>
+                  <Card background="#032202" color="white" key={index}>
                     <CardHeader>
                       <Flex>
                         <Heading size='md'>{item.name}</Heading>
@@ -333,15 +419,15 @@ function App() {
                       <Text>Produces {item.cps} batches per second</Text>
                     </CardBody>
                     <CardFooter>
-                      <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
-                      <Button onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
+                      <Button background="#1F6032" marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
+                      <Button background="#0D3E10" onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
                     </CardFooter>
                   </Card>
                 ))}
               </TabPanel>
               <TabPanel padding={0} height="100vh" overflowY="auto">
                 {distributionItems.map((item, index) => (
-                  <Card key={index}>
+                  <Card background="#032202" color="white" key={index}>
                     <CardHeader>
                       <Flex>
                         <Heading size='md'>{item.name}</Heading>
@@ -352,15 +438,15 @@ function App() {
                       <Text>Sells {item.cps} batches per second</Text>
                     </CardBody>
                     <CardFooter>
-                      <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
-                      <Button onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
+                      <Button background="#1F6032" marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
+                      <Button background="#0D3E10" onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
                     </CardFooter>
                   </Card>
                 ))}
               </TabPanel>
               <TabPanel padding={0} height="100vh" overflowY="auto">
                 {launderingItems.map((item, index) => (
-                  <Card key={index}>
+                  <Card background="#032202" color="white" key={index}>
                     <CardHeader>
                       <Flex>
                         <Heading size='md'>{item.name}</Heading>
@@ -371,15 +457,15 @@ function App() {
                       <Text>Launders {item.cps} batches per second</Text>
                     </CardBody>
                     <CardFooter>
-                      <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
-                      <Button onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
+                      <Button background="#1F6032" marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
+                      <Button background="#0D3E10" onClick={() => sellItem(item)}>Sell for ${item.sell}</Button>
                     </CardFooter>
                   </Card>
                 ))}
               </TabPanel>
               <TabPanel padding={0} height="100vh" overflowY="auto">
                 {upgradeItems.map((item, index) => (
-                  <Card key={index}>
+                  <Card background="#032202" color="white" key={index}>
                     <CardHeader>
                       <Flex>
                         <Heading size='md'>{item.name}</Heading>
@@ -390,14 +476,14 @@ function App() {
                       <Text>{item.description}</Text>
                     </CardBody>
                     <CardFooter>
-                      <Button marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
+                      <Button background="#1F6032" marginRight="10px" onClick={() => buyItem(item)}>Buy for ${item.cost}</Button>
                     </CardFooter>
                   </Card>
                 ))}
               </TabPanel>
               <TabPanel padding={0} height="100vh" overflowY="auto">
                 {achievements.map((item, index) => (
-                  <Card key={index}>
+                  <Card background="#032202" color="white" key={index}>
                     <CardHeader>
                       <Flex>
                         <Heading size='md'>{item.name}</Heading>
@@ -415,10 +501,31 @@ function App() {
         </Tabs>
       </GridItem>
       <GridItem area={'main'}>
-        <Box overflowY={"auto"} p={6} m={12} height="100vh" border="2px solid black">
-          {timeline.map((item, index) => (
-            <Text key={index}>{item}</Text>
-          ))}
+        <Box height="100vh" overflowY="auto" background="#29773E" color="#fff" pr={12} pl={12} pt={12}>
+          <ul
+            style={{
+              bottom: '0',
+              right: '0',
+              top: '0',
+              display: 'flex',
+              flexDirection: 'column',
+              listStyle: 'none',
+              justifyContent: 'flex-start'
+            }}
+          >
+            <AnimatePresence initial={false}>
+              {timeline.map((item, index) => (
+                <motion.li
+                  key={index}
+                  initial={{ opacity: 0, y: 50, scale: 0.3 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                >
+                  <Text key={index} fontSize="2xl">{item}</Text>
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </ul>
         </Box>
       </GridItem>
       <ul
