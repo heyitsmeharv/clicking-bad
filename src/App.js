@@ -120,12 +120,11 @@ function App() {
 
   // get cookie
   const getCookie = (name) => {
-    const decodedCookies = decodeURIComponent(document.cookie);
-    const cookiesArray = decodedCookies.split(';');
+    const cookiesArray = document.cookie.split(';');
     for (let i = 0; i < cookiesArray.length; i++) {
       let cookie = cookiesArray[i].trim();
       if (cookie.startsWith(name + '=')) {
-        return JSON.parse(decodeURIComponent(cookie.substring(name.length + 1)));
+        return JSON.parse(cookie.substring(name.length + 1));
       }
     }
     return null;
@@ -136,7 +135,7 @@ function App() {
     const expirationDate = new Date();
     expirationDate.setTime(expirationDate.getTime() + (days * 24 * 60 * 60 * 1000));
     const expires = "expires=" + expirationDate.toUTCString();
-    document.cookie = name + "=" + encodeURIComponent(JSON.stringify(value)) + ";" + expires + ";path=/";
+    document.cookie = name + "=" + JSON.stringify(value) + ";" + expires + ";path=/";
   };
 
   // load state from cookie when the component mounts
@@ -161,23 +160,23 @@ function App() {
     if (!isNaN(storedMultiplier)) {
       setMultiplier(storedMultiplier);
     }
-    const storedManufacturingItems = getCookie('manufacturingItems');
+    const storedManufacturingItems = getCookie("manufacturingItems");
     if (storedManufacturingItems !== null) {
       setManufacturingItems(storedManufacturingItems);
     }
-    const storedDistributionItems = getCookie('distributionItems');
+    const storedDistributionItems = getCookie("distributionItems");
     if (storedDistributionItems !== null) {
       setDistributionItems(storedDistributionItems);
     }
-    const storedLaunderingItems = getCookie('launderingItems');
+    const storedLaunderingItems = getCookie("launderingItems");
     if (storedLaunderingItems !== null) {
       setLaunderingItems(storedLaunderingItems);
     }
-    const storedUpgradeItems = getCookie('upgradeItems');
+    const storedUpgradeItems = getCookie("upgradeItems");
     if (storedUpgradeItems !== null) {
       setUpgradeItems(storedUpgradeItems);
     }
-    const storedAchievements = getCookie('achievements');
+    const storedAchievements = getCookie("achievements");
     if (storedAchievements !== null) {
       setAchievements(storedAchievements);
     }
@@ -200,7 +199,7 @@ function App() {
       setCookie('launderingItems', launderingItems, 1);
       setCookie('upgradeItems', upgradeItems, 1);
       setCookie('achievements', achievements, 1);
-    }, 1 * 60 * 1000);
+    }, 0.1 * 60 * 1000);
     setNotifications(add(notifications, 'Saved', 'Your game has been saved!', 'info'));
     return () => clearInterval(interval);
   }, []);
