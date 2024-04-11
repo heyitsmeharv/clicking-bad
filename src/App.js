@@ -125,7 +125,7 @@ function App() {
     for (let i = 0; i < cookiesArray.length; i++) {
       let cookie = cookiesArray[i].trim();
       if (cookie.startsWith(name + '=')) {
-        return cookie.substring(name.length + 1);
+        return JSON.parse(decodeURIComponent(cookie.substring(name.length + 1)));
       }
     }
     return null;
@@ -136,7 +136,7 @@ function App() {
     const expirationDate = new Date();
     expirationDate.setTime(expirationDate.getTime() + (days * 24 * 60 * 60 * 1000));
     const expires = "expires=" + expirationDate.toUTCString();
-    document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    document.cookie = name + "=" + encodeURIComponent(JSON.stringify(value)) + ";" + expires + ";path=/";
   };
 
   // load state from cookie when the component mounts
@@ -162,42 +162,46 @@ function App() {
       setMultiplier(storedMultiplier);
     }
     const storedManufacturingItems = getCookie('manufacturingItems');
-    if (!isNaN(storedManufacturingItems)) {
-      setManufacturingItems(JSON.parse(storedManufacturingItems));
+    if (storedManufacturingItems !== null) {
+      setManufacturingItems(storedManufacturingItems);
     }
     const storedDistributionItems = getCookie('distributionItems');
-    if (!isNaN(storedDistributionItems)) {
-      setDistributionItems(JSON.parse(storedDistributionItems));
+    if (storedDistributionItems !== null) {
+      setDistributionItems(storedDistributionItems);
     }
     const storedLaunderingItems = getCookie('launderingItems');
-    if (!isNaN(storedLaunderingItems)) {
-      setLaunderingItems(JSON.parse(storedLaunderingItems));
+    if (storedLaunderingItems !== null) {
+      setLaunderingItems(storedLaunderingItems);
     }
     const storedUpgradeItems = getCookie('upgradeItems');
-    if (!isNaN(storedUpgradeItems)) {
-      setUpgradeItems(JSON.parse(storedUpgradeItems));
+    if (storedUpgradeItems !== null) {
+      setUpgradeItems(storedUpgradeItems);
     }
     const storedAchievements = getCookie('achievements');
-    if (!isNaN(storedAchievements)) {
-      setAchievements(JSON.parse(storedAchievements));
+    if (storedAchievements !== null) {
+      setAchievements(storedAchievements);
+    }
+
+    if (storedBatches || storedBalance || storedClickValue || storedBatchValue || storedMultiplier || storedManufacturingItems !== null || storedDistributionItems !== null || storedLaunderingItems !== null || storedUpgradeItems !== null || storedAchievements !== null) {
+      setNotifications(add(notifications, 'Loaded', 'Your game has been loaded!', 'info'));
     }
   }, []);
 
   // call setCookie function every 5 minutes
   useEffect(() => {
-    setNotifications(add(notifications, 'Saved', 'Your game has been saved', 'info'));
     const interval = setInterval(() => {
       setCookie('batches', batches, 1);
       setCookie('balance', balance, 1);
       setCookie('clickValue', clickValue, 1);
       setCookie('batchValue', batchValue, 1);
       setCookie('multiplier', multiplier, 1);
-      setCookie('manufacturingItems', JSON.stringify(manufacturingItems), 1);
-      setCookie('distributionItems', JSON.stringify(distributionItems), 1);
-      setCookie('launderingItems', JSON.stringify(launderingItems), 1);
-      setCookie('upgradeItems', JSON.stringify(upgradeItems), 1);
-      setCookie('achievements', JSON.stringify(achievements), 1);
-    }, 5 * 60 * 1000);
+      setCookie('manufacturingItems', manufacturingItems, 1);
+      setCookie('distributionItems', distributionItems, 1);
+      setCookie('launderingItems', launderingItems, 1);
+      setCookie('upgradeItems', upgradeItems, 1);
+      setCookie('achievements', achievements, 1);
+    }, 1 * 60 * 1000);
+    setNotifications(add(notifications, 'Saved', 'Your game has been saved!', 'info'));
     return () => clearInterval(interval);
   }, []);
 
